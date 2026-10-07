@@ -26,7 +26,8 @@ export class BackgroundEngine {
   }
   save() { saveJSON(this.file, this.state); }
   invite(name = 'Owner', days = 30) {
-    if (Object.keys(this.state.peers).length >= 32) throw new Error('Revoke and remove unused peers before adding more (limit 32).');
+    const activePeers = Object.values(this.state.peers).filter(peer => !peer.revoked && peer.expires > Date.now());
+    if (activePeers.length >= 32) throw new Error('Revoke an unused pairing before adding more (limit 32 active pairings).');
     if (typeof name !== 'string' || name.length < 1 || name.length > 80) throw new Error('Use a name of 1–80 characters.');
     if (!Number.isInteger(days) || days < 1 || days > 365) throw new Error('Expiry must be 1–365 days.');
     const id = randomUUID();

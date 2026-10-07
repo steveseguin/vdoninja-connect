@@ -25,6 +25,8 @@ npm run background -- stop
 
 See [background setup](docs/background.md) for Windows login startup, another device, agent clients, voice, files and revoking access.
 
+[Watch the browser walkthrough](https://steveseguin.github.io/vdoninja-connect/demo.html): turn selected notes into a checklist, download a file and continue the conversation after reconnecting.
+
 ## Talk, share and listen
 
 - Send messages from the browser or a headless agent client.
@@ -46,6 +48,10 @@ node scripts/setup-local.mjs
 Reopen this trusted project in Codex to load its project MCP configuration. Other local MCP clients can launch `node` with the absolute path to `src/server.mjs`. Set a tool timeout of at least 35 seconds. Use either this MCP entry or the packaged plugin, so tools are not registered twice.
 
 Ask: "Create a peer room and give me the browser link." Another agent can join with `vdo_connect`, exchange messages and selected files, and disconnect when finished. These temporary sessions end with their MCP process and do not start background model turns. [Temporary room guide](docs/rooms.md).
+
+## Hosted MCP connector
+
+To connect a remote MCP client, deploy the [hosted connector](docs/hosted.md) and register its HTTPS `/mcp` endpoint. It uses OAuth to pair with the background service and exposes selected tasks and text files. GitHub Pages hosts the browser client; the connector needs an always-on server.
 
 ## Privacy and connections
 

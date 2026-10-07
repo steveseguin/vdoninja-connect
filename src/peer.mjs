@@ -8,7 +8,7 @@ export class Peer extends EventEmitter {
     super(); this.config = { room, password, streamId, name }; this.pending = new Map(); this.connected = false;
   }
   async start() {
-    const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(NINJA_|OPENAI_API_KEY|CODEX_API_KEY)/i.test(key)));
+    const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^(NINJA_|OPENAI_API_KEY|CODEX_API_KEY|VDONINJA_HOSTED_SECRET)/i.test(key)));
     env.UV_THREADPOOL_SIZE = '1';
     this.child = fork(fileURLToPath(new URL('./peer-worker.mjs', import.meta.url)), [], {
       env, windowsHide: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'] });

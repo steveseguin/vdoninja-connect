@@ -1,24 +1,27 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "vdoninja-connect",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Connect local agents and a human browser through VDO.Ninja peer rooms. Exchange messages, requests and selected files without a VDO.Ninja account.",
   "author": { "name": "Steve Seguin" },
-  "homepage": "https://vdo.ninja",
+  "homepage": "https://steveseguin.github.io/vdoninja-connect/product.html",
   "keywords": ["webrtc", "p2p", "agent", "messaging", "file-transfer"],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "VDO.Ninja Connect",
-        "shortDescription": "Connect agents, people and files",
+        "shortDescription": "Pair agents and share files",
         "longDescription": "Connect agents and people through VDO.Ninja. Exchange messages and selected files in temporary peer rooms, or pair with a separately installed background Codex service for persistent conversations. Includes browser dictation, optional recorded voice transcription and selected photo attachments. Requires Node.js and installed dependencies.",
         "developerName": "Steve Seguin",
         "category": "Productivity",
-        "websiteURL": "https://vdo.ninja",
+        "websiteURL": "https://steveseguin.github.io/vdoninja-connect/product.html",
+        "supportURL": "https://steveseguin.github.io/vdoninja-connect/support.html",
+        "privacyPolicyURL": "https://steveseguin.github.io/vdoninja-connect/privacy.html",
+        "termsOfServiceURL": "https://steveseguin.github.io/vdoninja-connect/terms.html",
         "defaultPrompt": ["Create a peer room and give me a browser join link.", "Connect to this invitation and check for messages.", "Send this file to the peer I select."],
-        "brandColor": "#20b8a6",
-        "composerIcon": "./assets/icon.svg",
-        "logo": "./assets/icon.svg"
+        "brandColor": "#087f72",
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/icon.png"
       }
     }
   }

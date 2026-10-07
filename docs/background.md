@@ -83,7 +83,7 @@ The default service directory is `~/.vdoninja-connect/background/`. Override it 
 - Model turns time out after three minutes. Audio transcription times out after one minute.
 - Defaults allow 120 accepted model requests and 1,000,000 reported tokens per UTC day across all peers. Token accounting is checked between turns, so one turn may exceed the threshold. Edit `dailyTurns` and `dailyTokens` in `config.json` while stopped to change these limits.
 - Files are limited to 8 MiB each, 32 MiB per peer and 128 MiB total. Delete files from the client when no longer needed. Incomplete uploads also count against the quota.
-- Up to 32 pairings are stored. Revoked pairings remain with their conversation ownership; use a fresh service data directory for a fresh installation.
+- Up to 32 unexpired, active pairings can connect. Revoked and expired pairings retain their conversation ownership but do not prevent new invitations. Delete unneeded shared files before revoking a pairing to reclaim file quota.
 - Requests carry stable IDs and a ten-minute validity window. Recent results remain available for at least twenty minutes. Reconnect and check the saved request ID after a timeout; do not blindly submit the same task under a new ID.
 - After an interrupted service run, unfinished requests are marked interrupted and are not automatically repeated. Send a new request when you want to continue the saved conversation.
 

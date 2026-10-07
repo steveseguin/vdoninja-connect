@@ -2,12 +2,28 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
+import { submissionConfig } from './submission-config.mjs';
 
 // Small, dependency-free ZIP writer using stored entries. Source-only allowlist:
-// no node_modules, session records, configuration, credentials or screenshots.
+// no node_modules, session records, private configuration or credentials.
 const root = fileURLToPath(new URL('../', import.meta.url));
-const files = ['package.json', 'package-lock.json', 'plugin.json', 'mcp.json', 'README.md'];
-for (const dir of ['src', 'scripts', 'companion', 'client', 'skills', 'assets', 'docs', 'tests', '.agents']) await collect(dir);
+const submission = process.argv.includes('--submission');
+const replacements = new Map();
+const files = submission ? ['plugin.json', 'mcp.json', 'assets/icon.png', 'skills/use-background-agent/SKILL.md'] : ['package.json', 'package-lock.json', 'plugin.json', 'mcp.json', 'README.md', 'Dockerfile', '.dockerignore'];
+if (submission) {
+  const { plugin, mcp } = submissionConfig(JSON.parse(await readFile(path.join(root, 'plugin.json'), 'utf8')), process.env.VDONINJA_HOSTED_ORIGIN, process.env.VDONINJA_REVIEW_VIDEO_URL);
+  for (const [name, value] of [['plugin.json', plugin], ['mcp.json', mcp]]) replacements.set(name, Buffer.from(JSON.stringify(value, null, 2) + '\n'));
+  replacements.set('skills/use-background-agent/SKILL.md', await readFile(path.join(root, 'hosted-plugin/skills/use-background-agent/SKILL.md')));
+  const urls = [plugin.extensions['com.openai'].review.demo_recording_url, ...['websiteURL', 'supportURL', 'privacyPolicyURL', 'termsOfServiceURL'].map(key => plugin.extensions['com.openai'].interface[key])];
+  for (const url of urls) {
+    const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`Public submission URL unavailable: ${url}`);
+  }
+  const challenge = await fetch(mcp.mcpServers['vdoninja-connect'].url, { signal: AbortSignal.timeout(15000) });
+  if (challenge.status !== 401 || !challenge.headers.get('www-authenticate')?.includes('resource_metadata=')) throw new Error('Hosted MCP must return its OAuth resource challenge to unauthenticated requests.');
+} else {
+  for (const dir of ['src', 'scripts', 'companion', 'client', 'skills', 'hosted-plugin', 'assets', 'docs', 'tests', '.agents']) await collect(dir);
+}
 async function collect(relative) {
   for (const item of await readdir(path.join(root, relative), { withFileTypes: true })) {
     const entry = `${relative}/${item.name}`;
@@ -30,7 +46,7 @@ let offset = 0;
 const entries = [];
 const central = [];
 for (const name of files.sort()) {
-  const bytes = await readFile(path.join(root, name));
+  const bytes = replacements.get(name) || await readFile(path.join(root, name));
   const filename = Buffer.from(name);
   const crc = crc32(bytes);
   const header = Buffer.alloc(30);
@@ -54,6 +70,6 @@ end.writeUInt32LE(centralBytes.length, 12); end.writeUInt32LE(offset, 16);
 const output = path.resolve(process.env.VDONINJA_PACKAGE_DIR || path.join(homedir(), '.codex/artifacts/vdoninja-connect'));
 await mkdir(output, { recursive: true });
 const version = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8')).version;
-const destination = path.join(output, `vdoninja-connect-${version}.zip`);
+const destination = path.join(output, `vdoninja-connect-${submission ? 'submission-' : ''}${version}.zip`);
 await writeFile(destination, Buffer.concat([...entries, centralBytes, end]));
-console.log(`Packaged ${files.length} source files: ${destination}`);
+console.log(`Packaged ${files.length} ${submission ? 'submission' : 'source'} files: ${destination}`);
