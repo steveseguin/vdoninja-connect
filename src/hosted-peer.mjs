@@ -34,13 +34,16 @@ export class HostedPeers {
   async ask(grant, { request_key, message, attachment_ids = [] }) {
     const id = hash(`${grant.id}:${request_key}`);
     const fingerprint = hash(JSON.stringify({ message, attachment_ids }));
-    const prior = grant.requests[id];
-    if (prior && prior.fingerprint !== fingerprint) throw new Error('This request key was already used for different content. Choose a new key.');
-    if (prior) return { request_id: id, ...(await this.use(grant, c => c.request('status', { request: id }))) };
-    if (Object.keys(grant.requests).length >= 200) throw new Error('This connection has reached its 200-request limit. Revoke it and authorize a fresh invitation.');
-    grant.requests[id] = { fingerprint, created: Date.now() }; this.store.save();
-    // Persist before the network call. A timeout never silently queues a second turn.
-    return { request_id: id, ...(await this.use(grant, c => c.request('ask', { text: message, attachments: attachment_ids }, id))) };
+    return this.use(grant, async c => {
+      const prior = grant.requests[id];
+      if (prior && prior.fingerprint !== fingerprint) throw new Error('This request key was already used for different content. Choose a new key.');
+      if (prior) return { request_id: id, ...(await c.request('status', { request: id })) };
+      if (Object.keys(grant.requests).length >= 200) throw new Error('This connection has reached its 200-request limit. Revoke it and authorize a fresh invitation.');
+      // Reserve only after local admission, but before the request handoff.
+      // A timeout after handoff must never silently queue a second turn.
+      grant.requests[id] = { fingerprint, created: Date.now() }; this.store.save();
+      return { request_id: id, ...(await c.request('ask', { text: message, attachments: attachment_ids }, id)) };
+    });
   }
   async close(id) {
     const entry = this.entries.get(id); if (!entry) return;
