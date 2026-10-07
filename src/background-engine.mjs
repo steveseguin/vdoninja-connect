@@ -25,6 +25,12 @@ export class BackgroundEngine {
     this.save();
   }
   save() { saveJSON(this.file, this.state); }
+  currentBudget() {
+    const day = new Date().toISOString().slice(0, 10);
+    const budget = this.state.budget;
+    if (budget.day !== day) Object.assign(budget, { day, turns: 0, tokens: 0 });
+    return budget;
+  }
   invite(name = 'Owner', days = 30) {
     if (Object.keys(this.state.peers).length >= 32) throw new Error('Revoke and remove unused peers before adding more (limit 32).');
     if (typeof name !== 'string' || name.length < 1 || name.length > 80) throw new Error('Use a name of 1–80 characters.');
@@ -92,9 +98,7 @@ export class BackgroundEngine {
         for (const id of [...(request.attachments || []), ...(request.audio ? [request.audio] : [])]) this.getFile(p, id);
         if (request.audio && !process.env.OPENAI_API_KEY) throw new Error('Recorded voice requires OPENAI_API_KEY on the service. You can use browser dictation instead.');
         if (this.queue.length >= 8) throw new Error('Agent queue is full.');
-        const day = new Date().toISOString().slice(0, 10);
-        const budget = this.state.budget;
-        if (budget.day !== day) Object.assign(budget, { day, turns: 0, tokens: 0 });
+        const budget = this.currentBudget();
         if (budget.turns >= this.config.dailyTurns || budget.tokens >= this.config.dailyTokens) throw new Error('Daily model budget reached.');
         const last = p.lastTurn || 0;
         if (Date.now() - last < 2000) throw new Error('Wait two seconds between model requests.');
@@ -198,6 +202,8 @@ export class BackgroundEngine {
     record.status = 'running'; this.save();
     try {
       if (p.revoked || p.expires < Date.now()) throw new Error('Pairing expired or revoked');
+      // A preceding turn may have exhausted the budget after this request was queued.
+      if (this.currentBudget().tokens >= this.config.dailyTokens) throw new Error('Daily model budget reached.');
       const cwd = path.join(this.root, 'conversations', p.id); mkdirSync(cwd, { recursive: true, mode: 0o700 });
       let prompt = record.request.text;
       if (record.request.audio) {
@@ -216,7 +222,7 @@ export class BackgroundEngine {
         onThread: id => { p.thread = id; this.save(); } });
       if (controller.signal.aborted) throw new Error('Cancelled');
       record.status = 'done'; record.text = Buffer.from(result.text).subarray(0, 24000).toString('utf8'); record.usage = result.usage;
-      this.state.budget.tokens += (result.usage?.input_tokens || 0) + (result.usage?.output_tokens || 0);
+      this.currentBudget().tokens += (result.usage?.input_tokens || 0) + (result.usage?.output_tokens || 0);
     } catch (error) { record.status = controller.signal.aborted ? 'cancelled' : 'error'; record.text = error.message; }
     delete record.request; this.save();
     try { await this.reply(p, p.target, record.id, this.publicRecord(record)); } catch { /* Client polls by request ID after reconnect. */ }
