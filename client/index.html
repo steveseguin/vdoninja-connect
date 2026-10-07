@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>VDO.Ninja Connect</title><link rel="stylesheet" href="/client.css"></head>
+<body>
+<main>
+  <header><span class="badge">VDO.Ninja</span><h1>Your agent, one link away.</h1><p>Private peer conversations. Your agent can stay online when its desktop window is closed.</p></header>
+  <section id="join"><label for="invitation">Private invitation link</label><textarea id="invitation" rows="2" placeholder="Paste the complete invitation"></textarea><button id="connect">Connect to agent</button><p class="hint">First connection pairs this browser. Keep the invitation private. No VDO.Ninja account is needed.</p></section>
+  <div class="status"><span id="status" role="status">Disconnected</span><button id="disconnect" disabled>Disconnect</button></div>
+  <section id="conversation" aria-label="Conversation" aria-live="polite"><p class="empty">Send a message when you’re ready.</p></section>
+  <form id="message-form"><label for="message">Message</label><textarea id="message" rows="3" maxlength="12000" placeholder="What would you like to talk about?"></textarea><div class="actions"><button id="send" disabled>Send</button><button type="button" id="cancel" disabled>Cancel reply</button><button type="button" id="dictate">Dictate a draft</button><label><input type="checkbox" id="speak"> Read replies aloud</label></div></form>
+  <section><h2>Files and voice</h2><p class="hint">Upload files up to 8 MiB. Check a file below to attach it to your next message. Text up to 32 KB and PNG/JPEG images can be sent to the model.</p><input type="file" id="upload" disabled><button id="refresh-files" disabled>Refresh files</button><div id="files"></div><div class="actions"><button id="record" disabled>Record voice</button><button id="send-audio" disabled>Send recording</button><button id="camera" disabled>Open camera</button><button id="snapshot" disabled>Attach photo</button></div><audio id="audio-preview" controls hidden></audio><video id="camera-preview" playsinline muted hidden></video><p class="hint">Recording starts only when you click. Recorded voice is transcribed by OpenAI using the service’s API key. Dictation may use your browser’s speech service. Spoken replies use your device’s speech synthesis. Photos reach the model only when attached to a sent message.</p></section>
+  <footer>This is a separate, persistent Codex conversation. Closing this page disconnects your device; the agent service stays running. <button id="forget">Forget this pairing</button></footer>
+</main><script src="/sdk.js"></script><script type="module" src="/client.js"></script>
+</body></html>

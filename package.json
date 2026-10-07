@@ -1,0 +1,32 @@
+{
+  "name": "@vdoninja/connect-plugin",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Accountless peer rooms, messages and file handoffs for local MCP agents.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "test:live": "node scripts/test-live.mjs",
+    "test:browser": "node scripts/test-browser.mjs",
+    "companion": "node scripts/serve-companion.mjs",
+    "background": "node scripts/background.mjs",
+    "peer": "node scripts/peer-client.mjs",
+    "package:client": "node scripts/package-client.mjs",
+    "build:pages": "node scripts/package-client.mjs --pages",
+    "package:plugin": "node scripts/package-plugin.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "@roamhq/wrtc": "0.8.0",
+    "@vdoninja/ninja-p2p": "0.2.4",
+    "@vdoninja/sdk": "1.6.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}

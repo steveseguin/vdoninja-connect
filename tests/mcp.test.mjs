@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { createServer } from '../src/server.mjs';
+
+test('MCP advertises bounded tools, enforces schemas and separates broadcast from direct send', async t => {
+  const calls = [];
+  const backend = { queue: (id, action) => { calls.push(action); return { state: 'queued' }; }, status: () => { throw new Error('Unknown session'); } };
+  const { server } = createServer(backend);
+  const client = new Client({ name: 'test', version: '1' });
+  const [a, b] = InMemoryTransport.createLinkedPair();
+  await server.connect(a);
+  await client.connect(b);
+  t.after(async () => { await client.close(); await server.close(); });
+  const { tools } = await client.listTools();
+  assert.equal(tools.length, 14);
+  const send = tools.find(tool => tool.name === 'vdo_send');
+  assert.equal(send.annotations.readOnlyHint, false);
+  assert.equal(send.annotations.destructiveHint, true);
+  assert.equal(tools.find(tool => tool.name === 'vdo_status').annotations.readOnlyHint, true);
+  const session_id = '81ed3925-e64b-4e88-b77c-51e427e4e6f9';
+  const bad = await client.callTool({ name: 'vdo_send', arguments: { session_id, text: 'missing recipient' } });
+  assert.equal(bad.isError, true);
+  assert.equal(calls.length, 0);
+  const malicious = '"; $(touch example) <script>alert(1)</script>';
+  const good = await client.callTool({ name: 'vdo_send', arguments: { session_id, target: 'peer', text: malicious } });
+  assert.equal(good.structuredContent.state, 'queued');
+  assert.deepEqual(calls[0], { kind: 'dm', target: 'peer', text: malicious });
+  const unknown = await client.callTool({ name: 'vdo_status', arguments: { session_id } });
+  assert.equal(unknown.isError, true);
+  const extra = await client.callTool({ name: 'vdo_send', arguments: { session_id, target: 'peer', text: 'hello', shell: 'bad' } });
+  assert.equal(extra.isError, true);
+  assert.equal(calls.length, 1);
+});

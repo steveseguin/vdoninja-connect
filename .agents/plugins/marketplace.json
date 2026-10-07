@@ -1,0 +1,10 @@
+{
+  "name": "vdoninja-local",
+  "interface": { "displayName": "VDO.Ninja local preview" },
+  "plugins": [{
+    "name": "vdoninja-connect",
+    "source": { "source": "local", "path": "./" },
+    "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+    "category": "Productivity"
+  }]
+}

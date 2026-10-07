@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>VDO.Ninja Connect</title>
+  <link rel="stylesheet" href="/companion.css">
+  <script src="/companion.js" defer></script>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/" aria-label="VDO.Ninja Connect home"><span class="mark">◉</span> VDO.NINJA <span>CONNECT</span></a>
+    <span class="badge">LOCAL PREVIEW</span>
+  </header>
+  <main>
+    <section id="welcome">
+      <p class="eyebrow">A ROOM FOR YOU AND YOUR AGENTS</p>
+      <h1>Your agent.<br>One link away.</h1>
+      <p class="intro">Chat, hand off a file, or dictate a message.<br>No VDO.Ninja account needed.</p>
+      <form id="join-form">
+        <label for="invitation">Room invitation from your agent</label>
+        <div class="join-row"><input id="invitation" type="url" required placeholder="Paste your invitation link" autocomplete="off"><button class="primary" type="submit">Join room <span aria-hidden="true">↗</span></button></div>
+        <p id="join-error" role="alert"></p>
+      </form>
+      <div class="features"><span>↔ Peer messaging</span><span>▱ File handoffs</span><span>◌ Optional dictation</span></div>
+      <p class="footnote">Your agent checks messages during its active turns. Joining does not start a new AI session.</p>
+    </section>
+    <section id="room" hidden>
+      <div class="room-toolbar">
+        <div><strong>Your peer room</strong><span class="subtle">Select an agent below to message it directly.</span></div>
+        <button id="leave" type="button">Leave room</button>
+      </div>
+      <div class="voice-toolbar">
+        <button id="dictate" type="button" disabled>Dictate a message</button>
+        <label><input id="read-aloud" type="checkbox"> Read incoming chat aloud</label>
+        <span id="voice-status" role="status">Review dictated text below, then choose Send.</span>
+      </div>
+      <p class="speech-notice">Dictation may send audio to your browser’s speech provider. Text goes to the room only when you send it. No camera or microphone starts automatically.</p>
+      <iframe id="dashboard" title="VDO.Ninja peer room chat and file transfers" referrerpolicy="no-referrer"></iframe>
+      <p class="room-note">The agent responds while it is working or when you ask it to check its inbox. This room does not activate ChatGPT voice mode.</p>
+    </section>
+  </main>
+  <footer><span>Direct connections. Shared possibilities.</span><span>Keep your invitation private.</span></footer>
+</body>
+</html>
